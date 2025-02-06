@@ -17,10 +17,10 @@ internal sealed class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
+                // See appsettings.json for configuration
                 // Add ApplicationInsights.config (see https://stackoverflow.com/questions/54772078/application-insights-from-last-debug-session)
                 services.AddApplicationInsightsTelemetryWorkerService();
 
-                // Register our background worker that uses Application Insights.
                 services.AddHostedService<Worker>();
             });
 }
@@ -44,10 +44,11 @@ internal sealed class Worker : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             var message = $"Heartbeat at {DateTimeOffset.Now}";
-            logger.LogInformation(message);
+            logger.LogInformation("Information: " + message); // see AppInsights.LogLevel.Default: this will NOT be logged
+            logger.LogWarning("Warning: " + message); // see AppInsights.LogLevel.Default: this WILL be logged
 
             // Send a trace message to Application Insights.
-            telemetryClient.TrackTrace(message);
+            //telemetryClient.TrackTrace(message);
 
             // Wait 5 seconds before sending the next telemetry item.
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
